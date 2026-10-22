@@ -1,0 +1,483 @@
+/* colours live here as variables, so changing the theme is a one-line edit */
+:root {
+  --bg: #0f1115;
+  --card: #171a20;
+  --key: #1b1e24;
+  --key-down: #262a32;
+  --line: #2b2f37;
+  --text: #e8e9ec;
+  --muted: #8b8f98;
+  --accent: #8fe3a8;
+  --accent-dim: #2b3a2f;
+  --warn: #f0b37e;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  -webkit-tap-highlight-color: transparent; /* no grey flash when tapping on ios */
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Consolas, "Inconsolata", ui-monospace, monospace;
+  text-transform: lowercase; /* safety net: everything shows in lowercase */
+  user-select: none;
+  -webkit-user-select: none;
+  overscroll-behavior: none; /* no rubber-band bounce */
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  touch-action: manipulation; /* removes ios's tap delay */
+}
+
+/* ---------- screens ---------- */
+
+.screen {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  /* env(...) keeps content clear of the notch and the home bar */
+  padding: calc(env(safe-area-inset-top) + 20px) 20px calc(env(safe-area-inset-bottom) + 20px);
+}
+
+.screen.active {
+  display: flex;
+  animation: fade-in 0.25s ease-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.spacer { flex: 1; }
+.muted  { color: var(--muted); font-size: 14px; }
+
+h1 {
+  font-size: 32px;
+  font-weight: 600;
+  margin-top: 24px;
+}
+
+/* ---------- home ---------- */
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.tab {
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--key);
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.tab.on {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.mode-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.mode {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  background: var(--card);
+  border-radius: 14px;
+  padding: 18px 16px;
+  text-align: left;
+  font-size: 17px;
+  outline: 1px solid transparent;
+  transition: outline-color 0.15s;
+}
+
+.mode-best { color: var(--accent); font-size: 14px; }
+
+.nav { display: flex; gap: 16px; }
+
+.mode.selected { outline-color: var(--accent); }
+
+.toggles {
+  display: flex;
+  flex-direction: column;
+}
+
+.toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  font-size: 15px;
+}
+
+/* a little on/off switch drawn with css */
+.switch {
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--key);
+  position: relative;
+  transition: background 0.2s;
+}
+
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: transform 0.2s, background 0.2s;
+}
+
+.switch.on { background: var(--accent-dim); }
+.switch.on::after { transform: translateX(18px); background: var(--accent); }
+
+.link {
+  color: var(--accent);
+  font-size: 14px;
+  padding: 6px 0;
+}
+
+/* ---------- settings ---------- */
+
+.section-label { font-size: 13px; margin: 14px 0 -4px 4px; }
+
+.panel.toggles { padding: 4px 14px; gap: 0; }
+.panel.rows { padding: 4px 14px; gap: 0; }
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  font-size: 15px;
+  text-align: left;
+}
+
+.row + .row, .toggle + .toggle { border-top: 1px solid var(--line); }
+.row.danger { color: #e07a6a; }
+
+.status { min-height: 1.2em; padding: 0 4px; font-size: 13px; }
+.fine { font-size: 12px; line-height: 1.5; padding: 0 4px; }
+
+.primary {
+  background: var(--accent);
+  color: var(--bg);
+  border-radius: 14px;
+  padding: 16px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ghost {
+  padding: 14px;
+  color: var(--muted);
+}
+
+/* ---------- game ---------- */
+
+.game-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.quit {
+  color: var(--muted);
+  font-size: 20px;
+  min-width: 28px;
+  padding: 2px 0;
+  text-align: left;
+}
+
+/* after the first tap it asks "quit?"; a second tap confirms */
+.quit.armed {
+  color: var(--warn);
+  font-size: 15px;
+}
+
+.hud {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+/* settings switched off (see renderToggles in app.js).
+   visibility: hidden keeps the space, so the game layout doesn't jump */
+.off-showHud .hud,
+.off-showBar .bar { visibility: hidden; }
+
+.off-showBests .mode-best,
+.off-showBests #final-badge,
+.off-showBests #final-compare { display: none; }
+
+.bar {
+  height: 3px;
+  background: var(--key);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+#bar-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--accent);
+  transform-origin: left;
+}
+
+.stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+#problem {
+  font-size: 44px;
+  white-space: nowrap;
+}
+
+/* long problems like "−147 + (−183)" get a smaller size so they fit */
+#problem.long { font-size: 34px; }
+
+#answer {
+  font-size: 36px;
+  color: var(--accent);
+  min-width: 140px;
+  min-height: 1.3em;
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.keypad button {
+  background: var(--key);
+  border-radius: 14px;
+  height: 58px;
+  font-size: 24px;
+}
+
+.keypad button.down { background: var(--key-down); }
+.keypad .skip { font-size: 17px; color: var(--warn); }
+
+/* ---------- stats ---------- */
+
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.title-row .link { font-size: 16px; }
+
+/* the stats screen is taller than the phone, so it scrolls */
+.screen.scroll { overflow-y: auto; }
+.screen.scroll > * { flex-shrink: 0; }
+
+.custom-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.custom-range.off { display: none; }
+
+input[type="date"] {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 16px; /* under 16px makes ios zoom in when tapped */
+  color: var(--text);
+  background: var(--card);
+  border: none;
+  border-radius: 10px;
+  padding: 8px 10px;
+  color-scheme: dark;
+}
+
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  font-size: 16px;
+  text-transform: inherit;
+  color: var(--text);
+  background: var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238b8f98'/%3E%3C/svg%3E") no-repeat right 12px center;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 32px 10px 12px;
+}
+
+.select.small {
+  font-size: 13px;
+  padding: 6px 28px 6px 10px;
+  background-color: var(--key);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.card, .panel {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.card .muted { font-size: 12px; }
+.card-value { font-size: 24px; margin-top: 2px; }
+.delta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.delta.good { color: var(--accent); }
+.delta.bad { color: var(--warn); }
+
+.panel { display: flex; flex-direction: column; gap: 10px; }
+.panel .muted { font-size: 13px; }
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.empty { padding: 8px 0; grid-column: 1 / -1; }
+.panel.off { display: none; }
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+h2 { font-size: 24px; font-weight: 600; }
+.note { font-size: 13px; margin-top: -6px; }
+
+/* a breakdown can have several titled groups of bars */
+.breakdown { display: flex; flex-direction: column; gap: 8px; }
+.breakdown .muted:not(:first-child) { margin-top: 10px; }
+.caption { min-height: 1.2em; font-size: 12px !important; }
+
+.chart { width: 100%; height: auto; display: block; }
+.chart text { fill: var(--muted); font-size: 10px; font-family: inherit; }
+.chart .grid { stroke: var(--line); stroke-dasharray: 2 3; }
+.chart .line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; }
+.chart .dot { fill: var(--accent); }
+
+.heatmap {
+  display: grid;
+  grid-template-rows: repeat(7, 1fr);
+  grid-auto-flow: column; /* fill top to bottom, then the next week */
+  gap: 3px;
+}
+
+.cell { aspect-ratio: 1; border-radius: 2px; }
+
+.op-row {
+  display: grid;
+  grid-template-columns: 86px 1fr 44px;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.op-track { height: 8px; background: var(--key); border-radius: 4px; overflow: hidden; }
+.op-bar { height: 100%; border-radius: 4px; }
+.op-sec { text-align: right; color: var(--muted); }
+
+.times-table {
+  display: grid;
+  grid-template-columns: 22px repeat(10, 1fr);
+  gap: 2px;
+}
+
+.tt-label { font-size: 9px; color: var(--muted); text-align: center; line-height: 14px; }
+.tt-cell { height: 14px; border-radius: 2px; background: var(--key); }
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.legend i { width: 14px; height: 10px; border-radius: 2px; }
+.legend span:first-child { margin-right: 4px; }
+.legend span:last-child { margin-left: 4px; }
+
+.slow-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  padding: 3px 0;
+}
+
+/* ---------- results ---------- */
+
+#results { align-items: center; text-align: center; }
+#results .primary { width: 100%; }
+
+.big {
+  font-size: 72px;
+  font-weight: 600;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums; /* digits keep the same width while counting up */
+}
+
+.badge {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 14px;
+}
+
+.badge:empty { display: none; }
+
+.final-slowest {
+  width: 100%;
+  margin-top: 16px;
+  text-align: left;
+}
+
+.button-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+}

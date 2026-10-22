@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- user-scalable=no stops ios zooming when you tap the keypad fast -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1115">
+  <title>alphamac</title>
+
+  <!-- makes it installable: name, icon, and opening full screen with no safari bars -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="alphamac">
+  <!-- the clock and battery sit on top of the app's own background -->
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- iphones don't have consolas, so inconsolata (a free lookalike) is the fallback -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- each <section> is one screen; only the one with class="active" is visible -->
+
+  <section id="home" class="screen active">
+    <div class="title-row">
+      <h1>alphamac</h1>
+      <span class="nav">
+        <button id="stats-btn" class="link">stats</button>
+        <button id="settings-btn" class="link">settings</button>
+      </span>
+    </div>
+    <p id="home-streak" class="muted"></p>
+
+    <!-- tabs and mode buttons are filled in by renderHome() in app.js -->
+    <div id="tabs" class="tabs"></div>
+    <p id="mode-desc" class="muted"></p>
+    <div id="mode-list" class="mode-list"></div>
+
+    <div class="spacer"></div>
+    <button id="start" class="primary">start</button>
+  </section>
+
+  <section id="settings" class="screen scroll">
+    <div class="title-row">
+      <h1>settings</h1>
+      <button id="settings-back" class="link">back</button>
+    </div>
+
+    <p class="muted section-label">show</p>
+    <!-- data-setting matches a key in SETTINGS (app.js). turning one off adds a class
+         like "off-showHud" to <body>, and style.css hides things based on that class -->
+    <div class="panel toggles">
+      <button class="toggle" data-setting="showHud">
+        <span>timer and score <span class="muted">· in game</span></span>
+        <span class="switch"></span>
+      </button>
+      <button class="toggle" data-setting="showBar">
+        <span>progress bar <span class="muted">· in game</span></span>
+        <span class="switch"></span>
+      </button>
+      <button class="toggle" data-setting="showBests">
+        <span>best scores <span class="muted">· home and results</span></span>
+        <span class="switch"></span>
+      </button>
+    </div>
+
+    <p class="muted section-label">your data</p>
+    <div class="panel rows">
+      <div class="row"><span>games saved</span><span id="saved-count" class="muted"></span></div>
+      <button id="export-btn" class="row"><span>export backup</span><span class="muted">→</span></button>
+      <button id="import-btn" class="row"><span>import backup</span><span class="muted">→</span></button>
+      <button id="delete-btn" class="row danger"><span id="delete-label">delete all games</span></button>
+    </div>
+    <p id="data-status" class="muted status"></p>
+    <input id="import-file" type="file" accept=".json,application/json" hidden>
+    <p class="muted fine">games are stored on this device only. export a backup now and then; it's the only way to get them back if they're ever cleared.</p>
+  </section>
+
+  <section id="game" class="screen">
+    <!-- quit sits outside .hud so it stays visible when the timer and score are hidden -->
+    <div class="game-top">
+      <button id="quit" class="quit">×</button>
+      <div class="hud">
+        <span id="timer"></span>
+        <span id="score">0</span>
+      </div>
+    </div>
+    <div class="bar"><div id="bar-fill"></div></div>
+
+    <div class="stage">
+      <div id="problem"></div>
+      <div id="answer"></div>
+    </div>
+
+    <div id="keypad" class="keypad">
+      <button data-key="1">1</button>
+      <button data-key="2">2</button>
+      <button data-key="3">3</button>
+      <button data-key="4">4</button>
+      <button data-key="5">5</button>
+      <button data-key="6">6</button>
+      <button data-key="7">7</button>
+      <button data-key="8">8</button>
+      <button data-key="9">9</button>
+      <button data-key="-">−</button>
+      <button data-key="0">0</button>
+      <button data-key="back">⌫</button>
+      <button data-key=".">.</button>
+      <button data-key="/">/</button>
+      <button data-key="skip" class="skip">skip</button>
+    </div>
+  </section>
+
+  <section id="results" class="screen">
+    <div class="spacer"></div>
+    <p id="final-label" class="muted">score</p>
+    <div id="final-score" class="big"></div>
+    <p id="final-badge" class="badge"></p>
+    <p id="final-compare" class="muted"></p>
+    <p id="final-detail" class="muted"></p>
+
+    <div id="final-slowest-panel" class="panel final-slowest">
+      <p class="muted">slowest this game</p>
+      <div id="final-slowest"></div>
+    </div>
+
+    <div class="spacer"></div>
+    <button id="again" class="primary">play again</button>
+    <div class="button-row">
+      <button id="home-btn" class="ghost">home</button>
+      <button id="results-stats" class="ghost">stats</button>
+    </div>
+  </section>
+
+  <section id="stats" class="screen scroll">
+    <div class="title-row">
+      <h1>stats</h1>
+      <button id="stats-back" class="link">back</button>
+    </div>
+    <p id="streak" class="muted"></p>
+
+    <div id="range-tabs" class="tabs"></div>
+    <div id="custom-range" class="custom-range">
+      <input type="date" id="from-date">
+      <span class="muted">to</span>
+      <input type="date" id="to-date">
+    </div>
+    <select id="preset-select" class="select"></select>
+
+    <div id="cards" class="cards"></div>
+
+    <div class="panel">
+      <p id="trend-label" class="muted"></p>
+      <div id="trend"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <span class="muted">last 26 weeks</span>
+        <select id="heat-select" class="select small">
+          <option value="games">games played</option>
+          <option value="best">best score</option>
+        </select>
+      </div>
+      <div id="heatmap" class="heatmap"></div>
+      <p id="heat-caption" class="muted caption"></p>
+    </div>
+
+    <!-- questions: pooled across every mode, filtered by the type dropdown -->
+    <div class="section-head">
+      <h2>questions</h2>
+      <select id="type-select" class="select small"></select>
+    </div>
+    <p class="muted note">all modes · same dates as above</p>
+
+    <div id="type-cards" class="cards"></div>
+
+    <div class="panel">
+      <p class="muted">daily average time · lower is better</p>
+      <div id="type-trend"></div>
+    </div>
+
+    <div id="ops-panel" class="panel">
+      <p class="muted">time per type</p>
+      <div id="ops"></div>
+    </div>
+
+    <div id="breakdown-panel" class="panel">
+      <div id="breakdown" class="breakdown"></div>
+    </div>
+
+    <div id="tt-panel" class="panel">
+      <p class="muted">times-table speed</p>
+      <div id="times-table" class="times-table"></div>
+      <p id="tt-caption" class="muted caption"></p>
+      <div class="legend">
+        <span>fast</span>
+        <i style="background:#8fe3a8"></i><i style="background:#4fb873"></i><i style="background:#c9c46a"></i><i style="background:#f0b37e"></i><i style="background:#e07a6a"></i>
+        <span>slow</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <p class="muted">slowest</p>
+      <div id="slowest"></div>
+    </div>
+  </section>
+
+  <!-- plain scripts, loaded in order: each one can use what the earlier ones define -->
+  <script src="js/problems.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/stats.js"></script>
+</body>
+</html>
